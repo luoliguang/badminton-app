@@ -1,0 +1,57 @@
+<view class="page">
+  <view class="hero-card">
+    <text class="hero-label">我的资料</text>
+
+    <!-- 头像区域：整个圆圈都是选择器触发区 -->
+    <view class="avatar-section">
+      <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image wx:if="{{avatarUrl}}" class="avatar-img" src="{{avatarUrl}}" mode="aspectFill" />
+        <view wx:else class="avatar-placeholder">
+          <text class="avatar-initial">{{nickname ? nickname[0] : '我'}}</text>
+        </view>
+      </button>
+      <text class="avatar-hint">点击头像更换</text>
+    </view>
+
+    <view class="hero-value-row">
+      <text class="hero-value">{{nickname}}</text>
+      <view class="edit-btn" bindtap="onEditTap">编辑昵称</view>
+    </view>
+    <view class="hero-footer">
+      <text class="hero-level">{{rank}}</text>
+      <text class="hero-trophy">🏸</text>
+    </view>
+  </view>
+
+  <!-- 编辑昵称弹层 -->
+  <view wx:if="{{editing}}" class="edit-overlay">
+    <view class="edit-modal">
+      <text class="edit-title">修改昵称</text>
+      <input class="edit-input" value="{{editNickname}}" bindinput="onNicknameInput"
+        placeholder="输入新昵称（最多20字）" maxlength="20" />
+      <view class="edit-actions">
+        <button class="edit-cancel-btn" bindtap="onCancelEdit">取消</button>
+        <button class="edit-save-btn" bindtap="onSaveProfile" loading="{{saving}}">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="profile-grid">
+    <view class="profile-card">
+      <text class="profile-label">总场次</text>
+      <text class="profile-value">{{totalGames}}</text>
+    </view>
+    <view class="profile-card accent">
+      <text class="profile-label">胜率</text>
+      <text class="profile-value">{{winRate}}</text>
+    </view>
+    <view class="profile-card">
+      <text class="profile-label">连胜</text>
+      <text class="profile-value">{{currentStreak}}</text>
+    </view>
+    <view class="profile-card accent-dark">
+      <text class="profile-label">当前状态</text>
+      <text class="profile-value">{{loading ? '加载中' : '已登录'}}</text>
+    </view>
+  </view>
+</view>

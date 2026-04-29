@@ -1,0 +1,20 @@
+.page { min-height:100vh; background:#f7faf9; padding:0 24px 24px; color:#011b3e; }
+.hero-card { margin-top:24px; padding:26px; background:#011b3e; border:2px solid #011b3e; }
+.hero-label { display:block; color:#abd600; font-size:12px; }
+.hero-value-row { display:flex; align-items:flex-end; gap:2px; margin-top:8px; }
+.hero-value { font-size:80px; color:#ccff00; line-height:1; }
+.hero-percent { color:#ccff00; font-size:24px; padding-bottom:10px; }
+.hero-footer { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+.hero-level { color:#fff; font-size:12px; }
+.hero-trophy { font-size:16px; }
+.tab-row { margin-top:16px; display:flex; gap:8px; }
+.tab-item { flex:1; height:44px; border:2px solid #011b3e; background:#fff; color:#011b3e; display:flex; align-items:center; justify-content:center; font-weight:600; }
+.tab-item.active { background:#011b3e; color:#ccff00; }
+.list-wrap { margin-top:14px; display:flex; flex-direction:column; gap:12px; }
+.history-card { border:2px solid #011b3e; background:#fff; padding:16px; display:flex; align-items:center; justify-content:space-between; }
+.history-title { display:block; font-size:16px; color:#011b3e; font-weight:600; }
+.history-sub { display:block; margin-top:4px; font-size:10px; color:#4a5f85; }
+.history-right { display:flex; flex-direction:column; align-items:flex-end; }
+.history-score { font-size:16px; color:#011b3e; font-weight:700; }
+.history-result.win { color:#a3e635; }
+.history-result.lose { color:#cbd5e1; }

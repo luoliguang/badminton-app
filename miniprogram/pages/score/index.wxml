@@ -1,0 +1,35 @@
+<view class="page {{isMatchPoint ? 'match-point-mode' : ''}}">
+  <view class="status-card">
+    <text class="status-title">{{statusText || '比赛进行中'}}</text>
+    <text class="status-subtitle">第 {{setNumber}} 局 · {{isMatchPoint ? '赛点中' : '正常进行'}}</text>
+  </view>
+
+  <view class="scoreboard {{isMatchPoint ? 'flash' : ''}}">
+    <view class="team-card left">
+      <text class="team-label">A 队</text>
+      <text class="score">{{scoreA}}</text>
+      <button class="score-btn add" data-team="a" bindtap="addPoint">A +1</button>
+      <button class="score-btn undo" data-team="a" bindtap="onUndoPoint">A 撤销</button>
+    </view>
+
+    <view class="mid-panel">
+      <text class="set-number">第 {{setNumber}} 局</text>
+      <text class="set-score">{{setScoreA}} : {{setScoreB}}</text>
+      <text class="set-score-label">大分</text>
+      <text class="match-point" wx:if="{{isMatchPoint}}">赛点</text>
+      <text class="finish-hint">达到胜局条件后将自动结算</text>
+    </view>
+
+    <view class="team-card right">
+      <text class="team-label">B 队</text>
+      <text class="score">{{scoreB}}</text>
+      <button class="score-btn add" data-team="b" bindtap="addPoint">B +1</button>
+      <button class="score-btn undo" data-team="b" bindtap="onUndoPoint">B 撤销</button>
+    </view>
+  </view>
+
+  <view class="log-card">
+    <text class="log-title">实时计分历史</text>
+    <view class="log-item" wx:for="{{eventLog}}" wx:key="index">{{item}}</view>
+  </view>
+</view>

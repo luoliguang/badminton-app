@@ -1,0 +1,107 @@
+<view class="page">
+  <view class="topbar">
+    <text class="topbar-title">比赛</text>
+    <text class="topbar-icon">⚙</text>
+  </view>
+
+  <view class="mode-card">
+    <text class="mode-label">{{room ? '比赛房间' : (mode === 'create' ? '创建房间' : '加入房间')}}</text>
+    <text class="mode-value">
+      {{room ? (matchType === 'singles' ? '单打' : matchType === 'doubles' ? '双打' : '团队') + ' · ' + room.maxPlayers + '人' : (mode === 'create' ? '配置你的赛制' : '输入口令加入')}}</text>
+  </view>
+
+  <view wx:if="{{mode === 'create' && !room}}" class="create-panel">
+    <text class="panel-title">创建房间</text>
+    <view class="type-row">
+      <view class="type-item {{matchType === 'singles' ? 'active' : ''}}" data-type="singles" bindtap="onMatchTypeSelect">单打</view>
+      <view class="type-item {{matchType === 'doubles' ? 'active' : ''}}" data-type="doubles" bindtap="onMatchTypeSelect">双打</view>
+      <view class="type-item {{matchType === 'team' ? 'active' : ''}}" data-type="team" bindtap="onMatchTypeSelect">团队</view>
+    </view>
+
+    <view class="setting-item">
+      <text class="setting-label">每局分数</text>
+      <picker mode="selector" range="{{[11,15,21]}}" bindchange="onPointsChange">
+        <view class="setting-value">{{ruleset.pointsToWin}}</view>
+      </picker>
+    </view>
+
+    <view class="setting-item">
+      <text class="setting-label">局数</text>
+      <picker mode="selector" range="{{[1,2,3]}}" bindchange="onSetsChange">
+        <view class="setting-value">{{ruleset.setsToWin}}</view>
+      </picker>
+    </view>
+
+    <view class="setting-item">
+      <text class="setting-label">参赛人数</text>
+      <picker mode="selector" range="{{[2,3,4,5,6,7,8]}}" bindchange="onPlayerCountChange">
+        <view class="setting-value">{{ruleset.playerCount}}</view>
+      </picker>
+    </view>
+
+    <view class="setting-item switch-row">
+      <text class="setting-label">是否允许加分到赛点后继续 deuce</text>
+      <switch checked="{{ruleset.deuceEnabled}}" bindchange="onDeuceChange" />
+    </view>
+
+    <button class="create-btn" bindtap="onCreateTap" loading="{{loading}}">创建房间</button>
+  </view>
+
+  <view wx:if="{{mode === 'join' && !room}}" class="join-card">
+    <text class="join-label">加入对局</text>
+    <view class="join-row">
+      <input class="join-input" placeholder="输入房间口令" value="{{joinCode}}" bindinput="onJoinInput" />
+      <button class="join-btn" bindtap="onJoinTap">加入</button>
+    </view>
+  </view>
+
+  <!-- 房间号卡片：创建成功后持久显示 -->
+  <view wx:if="{{roomCode}}" class="room-code-card">
+    <text class="room-code-label">房间口令（分享给朋友）</text>
+    <view class="room-code-row">
+      <text class="room-code-value">{{roomCode}}</text>
+      <view class="copy-btn" bindtap="onCopyCode">复制</view>
+    </view>
+  </view>
+
+  <view class="players-head">
+    <text class="section-title">玩家列表</text>
+    <text class="players-count">{{players.length}} 位成员</text>
+  </view>
+
+  <view class="players-list">
+    <block wx:for="{{players}}" wx:key="index">
+      <view wx:if="{{item.empty}}" class="player-card empty">
+        <view class="player-edge empty-edge"></view>
+        <view class="avatar empty-avatar">+</view>
+        <view class="player-info">
+          <text class="player-name empty-name">等待加入</text>
+          <text class="player-meta">空槽位</text>
+        </view>
+        <view class="player-status empty-status">＋</view>
+      </view>
+      <view wx:else class="player-card {{item.isHost ? 'host' : (item.isReady ? 'ready' : '')}}">
+        <view class="player-edge"></view>
+        <image wx:if="{{item.avatarUrl}}" class="avatar" src="{{item.avatarUrl}}" mode="aspectFill" />
+        <view wx:else class="avatar text-avatar">
+          <text class="avatar-text">{{item.nickName ? item.nickName[0] : '?'}}</text>
+        </view>
+        <view class="player-info">
+          <text class="player-name">{{item.nickName}}</text>
+          <text class="player-meta">{{item.team}} 队</text>
+        </view>
+        <!-- 房主可踢出非房主玩家 -->
+        <view wx:if="{{isHost && !item.isHost}}" class="kick-btn"
+          data-openid="{{item.openid}}" data-nickname="{{item.nickName}}"
+          bindtap="onKickPlayer">踢出</view>
+        <view wx:else class="player-status">{{item.isHost ? '👑' : ''}}</view>
+      </view>
+    </block>
+  </view>
+
+  <view class="footer-wrap">
+    <button wx:if="{{isHost}}" class="start-btn" bindtap="onStartMatch">开始比赛</button>
+    <button wx:if="{{isHost && room}}" class="dissolve-btn" bindtap="onDissolveRoom">解散房间</button>
+    <text wx:if="{{!isHost && room}}" class="ready-text">等待房主开始…</text>
+  </view>
+</view>

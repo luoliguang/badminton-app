@@ -1,0 +1,141 @@
+# 羽毛球小程序 · Cursor 开发规则
+
+## 项目技术栈
+- 微信小程序原生开发（WXML + WXSS + TypeScript）
+- 微信云开发（云函数 + 云数据库 + 云存储）
+- 不使用任何第三方 UI 框架，不使用 uni-app
+
+## 最重要的规则：单一真相来源
+
+### 类型定义
+- 所有数据类型只在 `miniprogram/types/index.ts` 定义
+- 云函数和前端页面都从这里 import，绝不各自定义重复类型
+- 改类型只改这一个文件，TypeScript 报错会告诉你哪里需要同步
+
+### 业务逻辑
+- 所有游戏计算逻辑只在 `miniprogram/utils/gameLogic.ts` 实现
+- 云函数通过 `require('../../miniprogram/utils/gameLogic')` 复用
+- 绝不在云函数或页面里重复实现相同的计算
+
+## 目录结构规范
+
+```
+miniprogram/
+  types/index.ts          ← 唯一类型定义
+  utils/gameLogic.ts      ← 唯一业务逻辑
+  utils/cloudHelper.ts    ← 云函数调用封装
+  app.ts                  ← 全局初始化，存 globalData.userInfo
+  pages/
+    home/                 ← 首页（胜率、热力图、历史）
+    room/                 ← 创建/加入房间
+    score/                ← 实时计分台
+    result/               ← 结算页
+  components/
+    PlayerCard/           ← 玩家卡片（房间页+结算页复用）
+    ScoreBoard/           ← 计分区域
+    MatchHistoryItem/     ← 历史记录卡片
+
+cloudfunctions/
+  login/index.js
+  createRoom/index.js
+  joinRoom/index.js
+  startMatch/index.js
+  addScore/index.js
+  endMatch/index.js
+  getMatchResult/index.js
+  getStats/index.js
+```
+
+## 云函数编写规范
+
+每个云函数必须：
+1. 第一行注释说明：依赖哪些类型、调用了哪些 gameLogic 函数
+2. 统一返回格式：`{ code: number, message: string, data: T | null }`
+3. 用 `ERROR_CODES` 常量而不是写死数字
+4. 用 try/catch 包裹所有数据库操作
+
+```js
+// 模板
+const cloud = require('wx-server-sdk')
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
+const db = cloud.database()
+
+exports.main = async (event, context) => {
+  const { OPENID } = cloud.getWXContext()
+  try {
+    // 业务逻辑
+    return { code: 0, message: 'ok', data: result }
+  } catch (err) {
+    return { code: 5000, message: err.message, data: null }
+  }
+}
+```
+
+## 前端页面编写规范
+
+每个页面的 `.ts` 文件：
+1. 在文件顶部注释说明：调用了哪些云函数、依赖哪些组件
+2. 云函数调用统一通过 `utils/cloudHelper.ts` 封装，不直接写 `wx.cloud.callFunction`
+3. 实时数据监听在 `onLoad` 里开启，在 `onUnload` 里关闭
+
+```ts
+// 实时监听模板
+let watcher: any = null
+
+Page({
+  onLoad() {
+    watcher = db.collection('matches').doc(matchId).watch({
+      onChange: (snapshot) => { this.updateUI(snapshot.docs[0]) }
+    })
+  },
+  onUnload() {
+    watcher?.close()
+  }
+})
+```
+
+## 组件编写规范
+
+组件必须：
+1. 只接收 props，不直接调用云函数（无业务逻辑）
+2. 用 `properties` 定义类型
+3. 通过 `triggerEvent` 向上传递事件
+
+PlayerCard 组件的 properties：
+- `player`: RoomPlayer 对象
+- `state`: 'host' | 'ready' | 'empty'
+- `matchType`: MatchType（影响布局）
+
+## 联动规则（改动时必须检查）
+
+| 改动位置 | 必须同步检查 |
+|---|---|
+| `MatchType` 枚举 | createRoom、PlayerCard、结算页 rankings 长度 |
+| `Ruleset` 字段 | gameLogic 的 isMatchPoint / checkSetWinner |
+| `UserProfile` 字段 | login云函数初始化、endMatch更新、home页展示 |
+| `ScoreEvent` 结构 | addScore写入、result页展示 |
+| `ERROR_CODES` | 所有云函数返回值、所有页面错误处理 |
+
+## 设计规范（来自 Figma）
+
+颜色：
+- `#011B3E` 深海蓝（主背景色、文字）
+- `#CCFF00` 荧光黄绿（品牌主色、强调色）
+- `#AE3200` 砖红（次要按钮）
+- `#1E3A8A` 深蓝（边框、导航）
+- `#A3E635` 亮绿（导航选中态）
+- `#4A5F85` 中蓝（次要文字）
+- `#F1F5F9` 浅灰（卡片背景）
+
+字体：使用系统字体 `-apple-system`，数字用 `font-variant-numeric: tabular-nums`
+
+间距：页面左右 padding 统一 24px，卡片内 padding 18-26px
+
+安全区域：底部导航高度 = 56px + `env(safe-area-inset-bottom)`
+
+## 禁止事项
+- 禁止硬编码 openid，必须从云函数 `getWXContext()` 获取
+- 禁止在前端存储敏感信息
+- 禁止重复实现 gameLogic.ts 里已有的计算
+- 禁止跳过错误处理
+- 禁止使用 `wx.getUserInfo`（已废弃），用 `wx.getUserProfile`

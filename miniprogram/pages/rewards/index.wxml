@@ -1,0 +1,46 @@
+<view class="page">
+  <view class="topbar">
+    <text class="topbar-title">称号记录</text>
+    <text class="topbar-sub">每场比赛获得的专属称号</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty-state">
+    <text class="empty-text">加载中…</text>
+  </view>
+
+  <view wx:elif="{{empty}}" class="empty-state">
+    <text class="empty-icon">🏅</text>
+    <text class="empty-text">还没有比赛记录</text>
+    <text class="empty-hint">完成一场比赛后称号将在这里展示</text>
+  </view>
+
+  <view wx:else class="match-list">
+    <view class="match-block" wx:for="{{matches}}" wx:key="_id">
+      <!-- 比赛头部 -->
+      <view class="match-header {{item.isWin ? 'win' : 'lose'}}">
+        <view class="match-header-left">
+          <text class="match-result-badge">{{item.isWin ? '胜' : '负'}}</text>
+          <view class="match-meta">
+            <text class="match-type">{{item.typeLabel}}</text>
+            <text class="match-date">{{item.dateLabel}}  {{item.durationLabel}}</text>
+          </view>
+        </view>
+        <view class="match-score-col">
+          <text class="set-score">{{item.setScores.A}} : {{item.setScores.B}}</text>
+          <text class="set-detail">{{item.setLabel}}</text>
+        </view>
+      </view>
+
+      <!-- 称号列表 -->
+      <view class="awards-list" wx:if="{{item.rewardEntries.length}}">
+        <view class="award-row" wx:for="{{item.rewardEntries}}" wx:key="key" wx:for-item="award">
+          <text class="award-key">{{award.key}}</text>
+          <text class="award-val">{{award.value}}</text>
+        </view>
+      </view>
+      <view wx:else class="no-awards">
+        <text>本场暂无称号记录</text>
+      </view>
+    </view>
+  </view>
+</view>

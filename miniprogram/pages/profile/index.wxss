@@ -1,0 +1,30 @@
+.page { min-height:100vh; background:#f7faf9; padding:0 24px 24px; color:#011b3e; }
+.hero-card { margin-top:24px; padding:26px; background:#011b3e; border:2px solid #011b3e; }
+.hero-label { display:block; color:#abd600; font-size:12px; }
+.avatar-section { display:flex; flex-direction:column; align-items:center; margin:16px 0 8px; }
+.avatar-btn { width:72px; height:72px; border-radius:9999px; padding:0; margin:0; background:transparent; border:none; line-height:1; }
+.avatar-btn::after { display:none; }
+.avatar-img { width:72px; height:72px; border-radius:9999px; border:2px solid #ccff00; display:block; }
+.avatar-placeholder { width:72px; height:72px; border-radius:9999px; background:#ccff00; border:2px solid #abd600; display:flex; align-items:center; justify-content:center; }
+.avatar-initial { font-size:28px; font-weight:700; color:#011b3e; line-height:1; }
+.avatar-hint { margin-top:6px; font-size:11px; color:#abd600; }
+.hero-value-row { margin-top:8px; display:flex; align-items:center; justify-content:space-between; }
+.hero-value { color:#ccff00; font-size:32px; font-weight:600; }
+.edit-btn { color:#abd600; font-size:13px; border:1px solid #abd600; padding:4px 12px; }
+.edit-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:100; display:flex; align-items:center; justify-content:center; }
+.edit-modal { background:#fff; padding:28px 24px; width:80%; }
+.edit-title { display:block; font-size:16px; font-weight:600; color:#011b3e; margin-bottom:16px; }
+.edit-input { border:2px solid #011b3e; padding:10px 12px; font-size:15px; color:#011b3e; width:100%; box-sizing:border-box; }
+.edit-actions { display:flex; gap:12px; margin-top:20px; }
+.edit-cancel-btn { flex:1; background:#fff; border:2px solid #011b3e; color:#011b3e; font-size:14px; }
+.edit-save-btn { flex:1; background:#ccff00; border:2px solid #011b3e; color:#011b3e; font-size:14px; font-weight:600; }
+.hero-footer { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+.hero-level { color:#fff; font-size:12px; }
+.hero-trophy { font-size:16px; }
+.profile-grid { margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.profile-card { padding:18px 16px; border:2px solid #011b3e; background:#fff; }
+.profile-card.accent { background:#ccff00; }
+.profile-card.accent-dark { background:#011b3e; }
+.profile-card.accent-dark .profile-label, .profile-card.accent-dark .profile-value { color:#fff; }
+.profile-label { display:block; font-size:12px; color:#4a5f85; }
+.profile-value { display:block; margin-top:8px; font-size:16px; color:#011b3e; font-weight:600; }

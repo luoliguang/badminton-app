@@ -1,0 +1,80 @@
+<view class="page">
+  <view class="celebrate-card">
+    <text class="celebrate-icon">🏆</text>
+    <text class="celebrate-title">比赛结束！</text>
+    <text class="celebrate-subtitle">精彩对决，再接再厉</text>
+    <text wx:if="{{matchSummary}}" class="celebrate-meta">
+      {{matchSummary.matchType === 'singles' ? '单打' : matchSummary.matchType === 'doubles' ? '双打' : '团队'}} · {{matchSummary.winner}} 队获胜
+    </text>
+    <!-- 各局比分 -->
+    <view wx:if="{{matchSummary.sets && matchSummary.sets.length}}" class="sets-row">
+      <view class="set-chip" wx:for="{{matchSummary.sets}}" wx:key="index">
+        <text class="set-chip-label">第{{item.setNumber}}局</text>
+        <text class="set-chip-score">{{item.scoreA}}-{{item.scoreB}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="summary-grid">
+    <view class="summary-card">
+      <text class="summary-label">时长</text>
+      <text class="summary-value">{{formatDurationText(stats.durationSeconds)}}</text>
+    </view>
+    <view class="summary-card">
+      <text class="summary-label">强度</text>
+      <text class="summary-stars">{{intensityStars}}</text>
+    </view>
+  </view>
+
+  <view class="section-head">
+    <text class="section-title">最终排名</text>
+  </view>
+
+  <view class="rank-list">
+    <view class="rank-card {{item.rank === 1 ? 'rank-1' : (item.rank === 2 ? 'rank-2' : 'rank-3')}}" wx:for="{{rankings}}" wx:key="index">
+      <view class="rank-tag">{{item.rank === 1 ? '冠军' : (item.rank === 2 ? '亚军' : '季军')}}</view>
+      <view class="rank-circle">{{item.rank}}</view>
+      <view class="rank-center">
+        <text class="rank-name">{{item.nickName}}</text>
+        <text class="rank-team">{{item.team}} 队</text>
+      </view>
+      <view class="rank-score">
+        <text class="score-num">{{item.score || 0}}</text>
+        <text class="score-unit">分</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-head reward-head">
+    <text class="section-title">结算奖励机制</text>
+  </view>
+
+  <view class="reward-list">
+    <view class="reward-card" wx:for="{{rewardList}}" wx:key="key">
+      <view class="reward-text">
+        <text class="reward-key">{{item.key}}</text>
+        <text class="reward-value">{{item.value}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="bento-grid">
+    <view class="mvp-card">
+      <text class="mvp-label">全场最有价值球员</text>
+      <view class="mvp-row">
+        <text class="mvp-name">{{stats.mvpNickName}}</text>
+        <text class="mvp-icon">🏆</text>
+      </view>
+    </view>
+    <view class="mini-card">
+      <text class="mini-label">最长回合</text>
+      <text class="mini-value">{{stats.longestRally}} 拍</text>
+    </view>
+    <view class="mini-card">
+      <text class="mini-label">速度纪录</text>
+      <text class="mini-value">{{stats.maxSpeedKmh}} KM/H</text>
+    </view>
+  </view>
+
+  <button class="home-btn" bindtap="onBackHome">返回首页</button>
+</view>

@@ -1,0 +1,20 @@
+.page { min-height:100vh; background:#f7faf9; padding:16px 24px 24px; }
+.status-card { padding:16px; background:#fff; border:2px solid #011b3e; margin-bottom:16px; }
+.status-title { font-size:18px; font-weight:600; color:#011b3e; display:block; }
+.status-subtitle { font-size:12px; color:#4a5f85; display:block; margin-top:6px; }
+.scoreboard { display:flex; gap:12px; }
+.team-card { flex:1; padding:16px; background:#fff; border:2px solid #011b3e; display:flex; flex-direction:column; align-items:center; }
+.team-label { font-size:12px; color:#4a5f85; }
+.score { font-size:48px; font-weight:600; color:#011b3e; margin:8px 0 12px; }
+.score-btn { width:100%; margin-top:8px; height:44px; border:2px solid #011b3e; }
+.add { background:#ccff00; }
+.undo { background:#fff; }
+.mid-panel { width:120px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:6px; }
+.set-number { font-size:14px; color:#011b3e; font-weight:600; }
+.set-score { font-size:22px; font-weight:700; color:#011b3e; }
+.set-score-label { font-size:10px; color:#4a5f85; }
+.match-point { font-size:12px; color:#ae3200; font-weight:700; }
+.finish-hint { font-size:11px; color:#4a5f85; text-align:center; }
+.log-card { margin-top:16px; padding:16px; border:2px solid #011b3e; background:#fff; }
+.log-title { font-size:16px; font-weight:600; color:#011b3e; display:block; margin-bottom:12px; }
+.log-item { font-size:12px; color:#4a5f85; margin-top:6px; }
