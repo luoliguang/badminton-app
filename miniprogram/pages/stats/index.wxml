@@ -1,13 +1,13 @@
 <view class="page">
   <view class="hero-card">
-    <text class="hero-label">总胜率</text>
+    <text class="hero-label">战绩总览</text>
     <view class="hero-value-row">
       <text class="hero-value">{{winRate.replace('%','')}}</text>
       <text class="hero-percent">%</text>
     </view>
     <view class="hero-footer">
       <text class="hero-level">总场次 {{totalGames}}</text>
-      <text class="hero-trophy">📊</text>
+      <text class="hero-trophy">stats</text>
     </view>
   </view>
 

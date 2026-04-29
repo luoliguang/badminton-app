@@ -14,6 +14,7 @@ Page({
     loading: true,
     joinCode: '',
     userInitial: '我',
+    userAvatarUrl: '',
     hasActiveRoom: false,
   },
 
@@ -21,7 +22,10 @@ Page({
     const app = getApp()
     const cached = app.globalData.userInfo
     if (cached && cached.nickName) {
-      this.setData({ userInitial: cached.nickName.charAt(0) })
+      this.setData({
+        userInitial: cached.nickName.charAt(0),
+        userAvatarUrl: cached.avatarUrl || '',
+      })
     }
     // 检测是否有活跃房间（用户已创建但未开始的房间）
     this.setData({ hasActiveRoom: !!app.globalData.activeRoomId })
@@ -30,6 +34,12 @@ Page({
 
   onAvatarTap() {
     wx.switchTab({ url: '/pages/profile/index' })
+  },
+
+  onHeatmapTap(e) {
+    const { date = '', count = 0 } = e.currentTarget.dataset || {}
+    if (!date) return
+    wx.showToast({ title: `${date} · ${count}`, icon: 'none', duration: 1500 })
   },
 
   async loadStats() {
@@ -42,6 +52,10 @@ Page({
       }
       if (res.code === 0 && res.data) {
         const data = res.data
+        const heatmap = (data.heatmap || []).map((item) => ({
+          ...item,
+          dateLabel: item.dateLabel || (item.date ? String(item.date).slice(5, 10) : ''),
+        }))
         this.setData({
           profile: {
             winRate: formatWinRate(data.profile?.winRate ?? 0),
@@ -50,7 +64,7 @@ Page({
             rank: data.profile?.rank ?? '新手',
           },
           recentMatches: data.recentMatches || [],
-          heatmap: data.heatmap || [],
+          heatmap,
         })
       } else {
         console.error('getStats error:', res.message)

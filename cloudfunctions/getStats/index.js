@@ -28,13 +28,20 @@ function safeDate(value) {
   return Number.isNaN(date.getTime()) ? null : date
 }
 
+function formatLocalDate(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 function buildHeatmap(matches) {
   const days = []
   const now = new Date()
   for (let i = 179; i >= 0; i--) {
     const d = new Date(now)
     d.setDate(now.getDate() - i)
-    const key = d.toISOString().slice(0, 10)
+    const key = formatLocalDate(d)
     days.push({ date: key, count: 0 })
   }
 
@@ -42,7 +49,7 @@ function buildHeatmap(matches) {
   ;(matches || []).forEach((match) => {
     const dt = safeDate(match.endAt) || safeDate(match.startAt)
     if (!dt) return
-    const key = dt.toISOString().slice(0, 10)
+    const key = formatLocalDate(dt)
     counts.set(key, (counts.get(key) || 0) + 1)
   })
 

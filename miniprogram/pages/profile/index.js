@@ -55,14 +55,30 @@ Page({
     })
   },
 
-  // 微信头像选择回调（open-type="chooseAvatar"）
-  async onChooseAvatar(e) {
-    const tempFilePath = e.detail.avatarUrl
-    if (!tempFilePath) return
+  async onAvatarTap() {
+    if (this.data.uploadingAvatar) return
+    try {
+      const res = await wx.chooseImage({
+        count: 1,
+        sizeType: ['compressed'],
+        sourceType: ['album', 'camera'],
+      })
+      const tempFilePath = res && res.tempFilePaths && res.tempFilePaths[0]
+      if (!tempFilePath) return
+      await this._uploadAvatar(tempFilePath)
+    } catch (err) {
+      const errMsg = String((err && err.errMsg) || '')
+      if (!errMsg.includes('cancel')) {
+        console.error('choose avatar error:', err)
+        wx.showToast({ title: '请选择头像后重试', icon: 'none' })
+      }
+    }
+  },
+
+  async _uploadAvatar(tempFilePath) {
     this.setData({ uploadingAvatar: true })
     wx.showLoading({ title: '上传头像中…' })
     try {
-      // 上传到云存储
       const app = getApp()
       const openid = (app.globalData.userInfo || {}).openid || 'unknown'
       const ext = tempFilePath.split('.').pop() || 'jpg'
@@ -74,7 +90,6 @@ Page({
       })
 
       const avatarUrl = uploadRes.fileID
-      // 保存到数据库
       const res = await updateProfile({ avatarUrl })
       if (res.code === 0) {
         const app2 = getApp()

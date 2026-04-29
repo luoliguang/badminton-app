@@ -9,15 +9,15 @@ exports.main = async (event, context) => {
 
   try {
     const matchRes = await db.collection('matches')
-      .where({
-        status: 'finished',
-        players: _.elemMatch({ openid: OPENID }),
-      })
+      .where({ status: 'finished' })
       .orderBy('startAt', 'desc')
-      .limit(limit)
+      .limit(Math.max(limit * 3, limit))
       .get()
 
-    const matches = matchRes.data.map(m => {
+    const matches = (matchRes.data || [])
+      .filter(m => (m.players || []).some(p => p.openid === OPENID))
+      .slice(0, limit)
+      .map(m => {
       const myPlayer = (m.players || []).find(p => p.openid === OPENID)
       const isWin = myPlayer ? myPlayer.team === m.winner : false
       const funRewards = (m.stats && m.stats.funRewards) || {}

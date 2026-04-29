@@ -17,7 +17,7 @@ Page({
     try {
       const res = await getRewards({ limit: 30 })
       if (res.code === 0 && res.data) {
-        const matches = res.data.matches.map(m => ({
+        const matches = (res.data.matches || []).map(m => ({
           ...m,
           typeLabel: m.matchType === 'singles' ? '单打' : m.matchType === 'doubles' ? '双打' : '团队',
           dateLabel: m.startAt ? new Date(m.startAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }) : '',
