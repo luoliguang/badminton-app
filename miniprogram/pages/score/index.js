@@ -1,3 +1,8 @@
+const STORAGE_KEYS = {
+  mode: 'score.matchMode',
+  trioRules: 'score.trioRules',
+};
+
 Page({
   data: {
     matchMode: 'duel', // duel | trio
@@ -21,6 +26,9 @@ Page({
     roundIndex: 1,
     rankings: [],
 
+    trioRuleTiePolicy: 'block', // block | leftLose | rightLose
+    trioRuleEndMatchPolicy: 'block', // block | autoSettle
+
     defaultTime: 10 * 60,
     timeLeft: 10 * 60,
     formattedTime: '10:00',
@@ -34,14 +42,78 @@ Page({
     touchStartYLeft: 0,
     touchStartYRight: 0,
     isMinimalTheme: false,
+    actionHistory: [],
   },
 
   onLoad() {
+    const mode = wx.getStorageSync(STORAGE_KEYS.mode);
+    const trioRules = wx.getStorageSync(STORAGE_KEYS.trioRules) || {};
+
+    if (mode === 'duel' || mode === 'trio') {
+      this.setData({ matchMode: mode });
+    }
+
+    if (trioRules.tiePolicy || trioRules.endMatchPolicy) {
+      this.setData({
+        trioRuleTiePolicy: trioRules.tiePolicy || 'block',
+        trioRuleEndMatchPolicy: trioRules.endMatchPolicy || 'block',
+      });
+    }
+
+    if (this.data.matchMode === 'trio') {
+      this.applyMode('trio');
+      return;
+    }
+
     this.updateDerived();
   },
 
   onUnload() {
     this.clearTimer();
+  },
+
+  snapshotState() {
+    return JSON.parse(
+      JSON.stringify({
+        matchMode: this.data.matchMode,
+        phase: this.data.phase,
+        teamA: this.data.teamA,
+        teamB: this.data.teamB,
+        scoreA: this.data.scoreA,
+        scoreB: this.data.scoreB,
+        players: this.data.players,
+        onCourtLeftId: this.data.onCourtLeftId,
+        onCourtRightId: this.data.onCourtRightId,
+        waitingId: this.data.waitingId,
+        roundScoreLeft: this.data.roundScoreLeft,
+        roundScoreRight: this.data.roundScoreRight,
+        roundIndex: this.data.roundIndex,
+        rankings: this.data.rankings,
+      })
+    );
+  },
+
+  pushHistory(type) {
+    const item = { type, snapshot: this.snapshotState() };
+    const next = [...this.data.actionHistory, item];
+    if (next.length > 10) next.shift();
+    this.setData({ actionHistory: next });
+  },
+
+  undoLastAction() {
+    const history = this.data.actionHistory || [];
+    if (!history.length) {
+      wx.showToast({ title: '暂无可撤销操作', icon: 'none' });
+      return;
+    }
+
+    const last = history[history.length - 1];
+    const nextHistory = history.slice(0, -1);
+
+    this.clearTimer();
+    this.setData({ ...last.snapshot, actionHistory: nextHistory, isRunning: false });
+    this.updateDerived();
+    wx.showToast({ title: '已撤销', icon: 'none' });
   },
 
   formatTime(seconds) {
@@ -134,12 +206,14 @@ Page({
     if (this.data.phase !== 'playing') return;
 
     if (this.data.matchMode === 'duel') {
+      if (delta !== 0) this.pushHistory('duelScore');
       if (side === 'LEFT') {
         this.setData({ scoreA: Math.max(0, this.data.scoreA + delta) });
       } else {
         this.setData({ scoreB: Math.max(0, this.data.scoreB + delta) });
       }
     } else {
+      if (delta !== 0) this.pushHistory('trioRoundScore');
       if (side === 'LEFT') {
         this.setData({ roundScoreLeft: Math.max(0, this.data.roundScoreLeft + delta) });
       } else {
@@ -197,24 +271,36 @@ Page({
     this.updatePlayerNameById(this.data.onCourtRightId, e.detail.value);
   },
 
+  getTrioLoserInfo(roundScoreLeft, roundScoreRight) {
+    if (roundScoreLeft > roundScoreRight) return { loserSide: 'right' };
+    if (roundScoreRight > roundScoreLeft) return { loserSide: 'left' };
+
+    if (this.data.trioRuleTiePolicy === 'leftLose') return { loserSide: 'left' };
+    if (this.data.trioRuleTiePolicy === 'rightLose') return { loserSide: 'right' };
+    return null;
+  },
+
   finishRound() {
-    if (this.data.phase !== 'playing' || this.data.matchMode !== 'trio') return;
+    if (this.data.phase !== 'playing') return;
+
+    if (this.data.matchMode === 'duel') {
+      this.pushHistory('duelFinishRound');
+      this.setData({ scoreA: 0, scoreB: 0 });
+      this.updateDerived();
+      return;
+    }
 
     const { roundScoreLeft, roundScoreRight, onCourtLeftId, onCourtRightId, waitingId } = this.data;
-    if (roundScoreLeft === roundScoreRight) {
+    const loserInfo = this.getTrioLoserInfo(roundScoreLeft, roundScoreRight);
+    if (!loserInfo) {
       wx.showToast({ title: '平分请继续打', icon: 'none' });
       return;
     }
 
-    let loserId = onCourtLeftId;
-    let winnerId = onCourtRightId;
-    let loserSide = 'left';
+    this.pushHistory('trioFinishRound');
 
-    if (roundScoreLeft > roundScoreRight) {
-      loserId = onCourtRightId;
-      winnerId = onCourtLeftId;
-      loserSide = 'right';
-    }
+    const loserId = loserInfo.loserSide === 'left' ? onCourtLeftId : onCourtRightId;
+    const winnerId = loserInfo.loserSide === 'left' ? onCourtRightId : onCourtLeftId;
 
     const players = this.data.players.map((p) => {
       if (p.id === onCourtLeftId) return { ...p, totalScore: p.totalScore + roundScoreLeft };
@@ -230,7 +316,7 @@ Page({
       waitingId: loserId,
     };
 
-    if (loserSide === 'left') {
+    if (loserInfo.loserSide === 'left') {
       nextState.onCourtLeftId = waitingId;
       nextState.onCourtRightId = winnerId;
     } else {
@@ -242,11 +328,39 @@ Page({
     this.updateDerived();
   },
 
+  settleCurrentRoundIfNeeded() {
+    if (this.data.roundScoreLeft === 0 && this.data.roundScoreRight === 0) return true;
+    const loserInfo = this.getTrioLoserInfo(this.data.roundScoreLeft, this.data.roundScoreRight);
+    if (!loserInfo) return false;
+    this.finishRound();
+    return true;
+  },
+
   endMatch() {
-    if (this.data.phase !== 'playing' || this.data.matchMode !== 'trio') return;
-    if (this.data.roundScoreLeft !== 0 || this.data.roundScoreRight !== 0) {
-      wx.showToast({ title: '请先结束当前局', icon: 'none' });
+    if (this.data.phase !== 'playing') return;
+
+    if (this.data.matchMode === 'duel') {
+      this.pushHistory('duelEndMatch');
+      this.pauseTimer();
+      const rankings = [
+        { id: 'a', name: this.data.teamA || 'TEAM A', totalScore: this.data.scoreA },
+        { id: 'b', name: this.data.teamB || 'TEAM B', totalScore: this.data.scoreB },
+      ].sort((x, y) => y.totalScore - x.totalScore);
+      this.setData({ phase: 'finished', rankings });
       return;
+    }
+
+    if (this.data.roundScoreLeft !== 0 || this.data.roundScoreRight !== 0) {
+      if (this.data.trioRuleEndMatchPolicy === 'block') {
+        wx.showToast({ title: '请先结束当前局', icon: 'none' });
+        return;
+      }
+
+      const ok = this.settleCurrentRoundIfNeeded();
+      if (!ok) {
+        wx.showToast({ title: '平分无法自动结算', icon: 'none' });
+        return;
+      }
     }
 
     this.pauseTimer();
@@ -263,6 +377,7 @@ Page({
         scoreB: 0,
         timeLeft: this.data.defaultTime,
         isRunning: false,
+        actionHistory: [],
       });
       this.updateDerived();
       return;
@@ -280,15 +395,19 @@ Page({
       rankings: [],
       timeLeft: this.data.defaultTime,
       isRunning: false,
+      lastAction: null,
     });
     this.updateDerived();
   },
 
   applyMode(mode) {
     this.clearTimer();
+    wx.setStorageSync(STORAGE_KEYS.mode, mode);
     this.setData({
       matchMode: mode,
       phase: 'playing',
+      teamA: 'TEAM BLUE',
+      teamB: 'TEAM RED',
       scoreA: 0,
       scoreB: 0,
       players: [
@@ -305,6 +424,7 @@ Page({
       rankings: [],
       timeLeft: this.data.defaultTime,
       isRunning: false,
+      lastAction: null,
     });
     this.updateDerived();
   },
@@ -331,6 +451,27 @@ Page({
       success: (res) => {
         if (res.confirm) this.applyMode(mode);
       },
+    });
+  },
+
+  onTiePolicyChange(e) {
+    const idx = Number(e.detail.value);
+    const map = ['block', 'leftLose', 'rightLose'];
+    const value = map[idx] || 'block';
+    this.setData({ trioRuleTiePolicy: value });
+    wx.setStorageSync(STORAGE_KEYS.trioRules, {
+      tiePolicy: value,
+      endMatchPolicy: this.data.trioRuleEndMatchPolicy,
+    });
+  },
+
+  onEndMatchPolicyChange(e) {
+    const idx = Number(e.detail.value);
+    const value = idx === 1 ? 'autoSettle' : 'block';
+    this.setData({ trioRuleEndMatchPolicy: value });
+    wx.setStorageSync(STORAGE_KEYS.trioRules, {
+      tiePolicy: this.data.trioRuleTiePolicy,
+      endMatchPolicy: value,
     });
   },
 

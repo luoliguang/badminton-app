@@ -143,7 +143,7 @@
 }
 
 .center-panel {
-  width: 34%;
+  /* width: 34%; */
   min-width: 260rpx;
   max-width: 360rpx;
   padding: 16rpx;
@@ -184,6 +184,7 @@
 .mini {
   margin: 0;
   width: 56rpx;
+  min-width: 56rpx;
   height: 56rpx;
   line-height: 56rpx;
   border-radius: 12rpx;
@@ -195,6 +196,25 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  flex-shrink: 0;
+}
+
+.main-duel .mini {
+  width: 50rpx;
+  min-width: 50rpx;
+  height: 50rpx;
+  line-height: 50rpx;
+  font-size: 26rpx;
+  padding: 0;
+}
+
+.main-duel .timer-row {
+  gap: 2rpx;
+  justify-content: center;
+}
+
+.main-duel .timer {
+  font-size: 64rpx;
 }
 
 .timer {
@@ -241,7 +261,9 @@
 }
 
 .round-end,
-.match-end {
+.match-end,
+.trio-undo
+ {
   margin: 0;
   flex: 1;
   border-radius: 12rpx;
@@ -257,21 +279,23 @@
 }
 
 .main-trio .round-end,
-.main-trio .match-end {
+.main-trio .match-end,
+.main-trio .trio-undo {
   height: 56rpx;
   line-height: 56rpx;
   font-size: 20rpx;
 }
 
 .main-trio .trio-actions {
-  flex-direction: column;
+  flex-direction: row;
   gap: 8rpx;
 }
 
 .main-trio .trio-actions .round-end,
-.main-trio .trio-actions .match-end {
-  width: 100%;
-  flex: none;
+.main-trio .trio-actions .match-end,
+.main-trio .trio-actions .trio-undo {
+  width: auto;
+  flex: 1;
 }
 
 .round-end {
@@ -287,12 +311,13 @@
 }
 
 .start,
-.reset {
+.reset,
+.undo-btn {
   margin: 0;
   border-radius: 14rpx;
-  height: 68rpx;
-  line-height: 68rpx;
-  font-size: 26rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  font-size: 22rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -321,6 +346,56 @@
   color: #c7d2fe;
   background: #1d2848;
   border: 1px solid #334155;
+}
+
+.undo-btn {
+  width: 100%;
+  height: 56rpx;
+  line-height: 56rpx;
+  font-size: 22rpx;
+  color: #f7e8ff;
+  background: #3a1f46;
+  border: 1px solid #7a46a4;
+}
+
+.trio-undo {
+  color: #f7e8ff;
+  background: #3a1f46;
+  border: 1px solid #7a46a4;
+}
+
+.rules-wrap {
+  width: 100%;
+  padding: 8rpx;
+  border-radius: 12rpx;
+  background: rgba(18, 28, 56, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+}
+
+.rule-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8rpx;
+}
+
+.rule-row + .rule-row {
+  margin-top: 6rpx;
+}
+
+.rule-label {
+  font-size: 17rpx;
+  color: #bcd0ff;
+}
+
+.rule-value {
+  font-size: 17rpx;
+  color: #7ee7ff;
+  background: #11283e;
+  border: 1px solid #2f7db2;
+  border-radius: 8rpx;
+  padding: 4rpx 8rpx;
 }
 
 .theme-toggle {
@@ -702,7 +777,8 @@
   .main-trio .start,
   .main-trio .reset,
   .main-trio .round-end,
-  .main-trio .match-end {
+  .main-trio .match-end,
+  .main-trio .trio-undo {
     height: 46rpx;
     line-height: 46rpx;
     font-size: 17rpx;
@@ -724,6 +800,22 @@
 @media (max-height: 430px) {
   .main {
     padding: 6rpx 8rpx;
+  }
+
+  .main-duel .mini {
+    width: 52rpx;
+    min-width: 52rpx;
+    height: 52rpx;
+    line-height: 52rpx;
+    font-size: 30rpx;
+  }
+
+  .main-duel .timer {
+    font-size: 60rpx;
+  }
+
+  .main-duel .timer-row {
+    gap: 4rpx;
   }
 
   .team-name {

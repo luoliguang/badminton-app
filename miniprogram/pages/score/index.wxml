@@ -3,7 +3,7 @@
   <view class="bg-blue"></view>
   <view class="bg-red"></view>
 
-  <view wx:if="{{phase === 'playing'}}" class="main {{matchMode === 'trio' ? 'main-trio' : ''}}">
+  <view wx:if="{{phase === 'playing'}}" class="main {{matchMode === 'trio' ? 'main-trio' : 'main-duel'}}">
     <view class="team team-a">
       <text wx:if="{{matchMode === 'duel' ? isALeading : isLeftLeading}}" class="crown crown-a">👑</text>
       <input
@@ -49,6 +49,22 @@
       <view wx:if="{{matchMode === 'trio'}}" class="center-ops trio-actions mt-8">
         <button class="round-end" bindtap="finishRound">结束本局</button>
         <button class="match-end" bindtap="endMatch">结束比赛</button>
+        <button class="trio-undo" bindtap="undoLastAction">撤销上一步</button>
+      </view>
+
+      <view wx:if="{{matchMode === 'trio'}}" class="rules-wrap mt-8">
+        <view class="rule-row">
+          <text class="rule-label">平分结束策略</text>
+          <picker mode="selector" range="{{['不允许结束','左侧判负','右侧判负']}}" value="{{trioRuleTiePolicy === 'block' ? 0 : (trioRuleTiePolicy === 'leftLose' ? 1 : 2)}}" bindchange="onTiePolicyChange">
+            <view class="rule-value">{{trioRuleTiePolicy === 'block' ? '不允许结束' : (trioRuleTiePolicy === 'leftLose' ? '左侧判负' : '右侧判负')}}</view>
+          </picker>
+        </view>
+        <view class="rule-row">
+          <text class="rule-label">结束比赛策略</text>
+          <picker mode="selector" range="{{['必须先结束本局','自动结算当前局']}}" value="{{trioRuleEndMatchPolicy === 'block' ? 0 : 1}}" bindchange="onEndMatchPolicyChange">
+            <view class="rule-value">{{trioRuleEndMatchPolicy === 'block' ? '必须先结束本局' : '自动结算当前局'}}</view>
+          </picker>
+        </view>
       </view>
 
       <text wx:if="{{timeLeft === 0}}" class="time-over">TIME OVER</text>
