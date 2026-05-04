@@ -3,22 +3,33 @@
   <view class="bg-blue"></view>
   <view class="bg-red"></view>
 
-  <view class="main">
+  <view wx:if="{{phase === 'playing'}}" class="main {{matchMode === 'trio' ? 'main-trio' : ''}}">
     <view class="team team-a">
-      <text wx:if="{{isALeading}}" class="crown crown-a">👑</text>
-      <input class="team-name team-name-a" value="{{teamA}}" bindinput="onTeamAInput" maxlength="20" />
+      <text wx:if="{{matchMode === 'duel' ? isALeading : isLeftLeading}}" class="crown crown-a">👑</text>
+      <input
+        class="team-name team-name-a"
+        value="{{matchMode === 'duel' ? teamA : leftPlayerName}}"
+        bindinput="onTeamAInput"
+        maxlength="20"
+      />
 
       <view
         class="score-touch-zone"
         catchtouchstart="onScoreTouchStartA"
         catchtouchend="onScoreTouchEndA"
       >
-        <text class="score score-a">{{scoreA}}</text>
+        <text class="score score-a">{{matchMode === 'duel' ? scoreA : roundScoreLeft}}</text>
       </view>
     </view>
 
     <view class="center-panel">
       <button class="theme-toggle" bindtap="toggleTheme">{{isMinimalTheme ? '霓虹版' : '极简版'}}</button>
+
+      <view class="mode-toggle">
+        <button class="mode-btn {{matchMode === 'duel' ? 'mode-active' : ''}}" data-mode="duel" bindtap="switchMode">双人</button>
+        <button class="mode-btn {{matchMode === 'trio' ? 'mode-active' : ''}}" data-mode="trio" bindtap="switchMode">三人轮转</button>
+      </view>
+
       <text class="timer-label">MATCH TIME</text>
 
       <view class="timer-row">
@@ -27,25 +38,52 @@
         <button wx:if="{{!isRunning}}" class="mini" data-delta="1" bindtap="adjustTime">+</button>
       </view>
 
+      <text wx:if="{{matchMode === 'trio'}}" class="round-label">第 {{roundIndex}} 局</text>
+      <text wx:if="{{matchMode === 'trio'}}" class="waiting-label">待场：{{waitingPlayerName}}</text>
+
       <view class="center-ops">
         <button class="start {{isRunning ? 'pause' : 'play'}}" bindtap="toggleTimer">{{isRunning ? '暂停' : '开始'}}</button>
         <button class="reset" bindtap="resetTimer">重置时间</button>
+      </view>
+
+      <view wx:if="{{matchMode === 'trio'}}" class="center-ops trio-actions mt-8">
+        <button class="round-end" bindtap="finishRound">结束本局</button>
+        <button class="match-end" bindtap="endMatch">结束比赛</button>
       </view>
 
       <text wx:if="{{timeLeft === 0}}" class="time-over">TIME OVER</text>
     </view>
 
     <view class="team team-b">
-      <text wx:if="{{isBLeading}}" class="crown crown-b">👑</text>
-      <input class="team-name team-name-b" value="{{teamB}}" bindinput="onTeamBInput" maxlength="20" />
+      <text wx:if="{{matchMode === 'duel' ? isBLeading : isRightLeading}}" class="crown crown-b">👑</text>
+      <input
+        class="team-name team-name-b"
+        value="{{matchMode === 'duel' ? teamB : rightPlayerName}}"
+        bindinput="onTeamBInput"
+        maxlength="20"
+      />
 
       <view
         class="score-touch-zone"
         catchtouchstart="onScoreTouchStartB"
         catchtouchend="onScoreTouchEndB"
       >
-        <text class="score score-b">{{scoreB}}</text>
+        <text class="score score-b">{{matchMode === 'duel' ? scoreB : roundScoreRight}}</text>
       </view>
+    </view>
+  </view>
+
+  <view wx:elif="{{phase === 'finished'}}" class="result-wrap">
+    <view class="result-card">
+      <text class="result-title">比赛结果</text>
+      <view class="result-list">
+        <view wx:for="{{rankings}}" wx:key="id" class="rank-row">
+          <text class="rank-index">第{{index + 1}}名</text>
+          <text class="rank-name">{{item.name}}</text>
+          <text class="rank-score">{{item.totalScore}} 分</text>
+        </view>
+      </view>
+      <button class="restart" bindtap="restartMatch">再来一场</button>
     </view>
   </view>
 </view>
