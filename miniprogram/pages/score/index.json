@@ -1,4 +1,4 @@
 {
-  "navigationBarTitleText": "计分台",
-  "usingComponents": {}
+  "navigationStyle": "custom",
+  "pageOrientation": "landscape"
 }

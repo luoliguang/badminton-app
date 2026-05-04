@@ -1,35 +1,51 @@
-<view class="page {{isMatchPoint ? 'match-point-mode' : ''}}">
-  <view class="status-card">
-    <text class="status-title">{{statusText || '比赛进行中'}}</text>
-    <text class="status-subtitle">第 {{setNumber}} 局 · {{isMatchPoint ? '赛点中' : '正常进行'}}</text>
-  </view>
+<view class="page {{isMinimalTheme ? 'minimal' : ''}}">
+  <view class="bg-grid"></view>
+  <view class="bg-blue"></view>
+  <view class="bg-red"></view>
 
-  <view class="scoreboard {{isMatchPoint ? 'flash' : ''}}">
-    <view class="team-card left">
-      <text class="team-label">A 队</text>
-      <text class="score">{{scoreA}}</text>
-      <button class="score-btn add" data-team="a" bindtap="addPoint">A +1</button>
-      <button class="score-btn undo" data-team="a" bindtap="onUndoPoint">A 撤销</button>
+  <view class="main">
+    <view class="team team-a">
+      <text wx:if="{{isALeading}}" class="crown crown-a">👑</text>
+      <input class="team-name team-name-a" value="{{teamA}}" bindinput="onTeamAInput" maxlength="20" />
+
+      <view
+        class="score-touch-zone"
+        catchtouchstart="onScoreTouchStartA"
+        catchtouchend="onScoreTouchEndA"
+      >
+        <text class="score score-a">{{scoreA}}</text>
+      </view>
     </view>
 
-    <view class="mid-panel">
-      <text class="set-number">第 {{setNumber}} 局</text>
-      <text class="set-score">{{setScoreA}} : {{setScoreB}}</text>
-      <text class="set-score-label">大分</text>
-      <text class="match-point" wx:if="{{isMatchPoint}}">赛点</text>
-      <text class="finish-hint">达到胜局条件后将自动结算</text>
+    <view class="center-panel">
+      <button class="theme-toggle" bindtap="toggleTheme">{{isMinimalTheme ? '霓虹版' : '极简版'}}</button>
+      <text class="timer-label">MATCH TIME</text>
+
+      <view class="timer-row">
+        <button wx:if="{{!isRunning}}" class="mini" data-delta="-1" bindtap="adjustTime">-</button>
+        <text class="timer {{isTimeCritical ? 'timer-critical' : ''}}">{{formattedTime}}</text>
+        <button wx:if="{{!isRunning}}" class="mini" data-delta="1" bindtap="adjustTime">+</button>
+      </view>
+
+      <view class="center-ops">
+        <button class="start {{isRunning ? 'pause' : 'play'}}" bindtap="toggleTimer">{{isRunning ? '暂停' : '开始'}}</button>
+        <button class="reset" bindtap="resetTimer">重置时间</button>
+      </view>
+
+      <text wx:if="{{timeLeft === 0}}" class="time-over">TIME OVER</text>
     </view>
 
-    <view class="team-card right">
-      <text class="team-label">B 队</text>
-      <text class="score">{{scoreB}}</text>
-      <button class="score-btn add" data-team="b" bindtap="addPoint">B +1</button>
-      <button class="score-btn undo" data-team="b" bindtap="onUndoPoint">B 撤销</button>
-    </view>
-  </view>
+    <view class="team team-b">
+      <text wx:if="{{isBLeading}}" class="crown crown-b">👑</text>
+      <input class="team-name team-name-b" value="{{teamB}}" bindinput="onTeamBInput" maxlength="20" />
 
-  <view class="log-card">
-    <text class="log-title">实时计分历史</text>
-    <view class="log-item" wx:for="{{eventLog}}" wx:key="index">{{item}}</view>
+      <view
+        class="score-touch-zone"
+        catchtouchstart="onScoreTouchStartB"
+        catchtouchend="onScoreTouchEndB"
+      >
+        <text class="score score-b">{{scoreB}}</text>
+      </view>
+    </view>
   </view>
 </view>

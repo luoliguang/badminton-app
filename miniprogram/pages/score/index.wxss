@@ -1,20 +1,405 @@
-.page { min-height:100vh; background:#f7faf9; padding:16px 24px 24px; }
-.status-card { padding:16px; background:#fff; border:2px solid #011b3e; margin-bottom:16px; }
-.status-title { font-size:18px; font-weight:600; color:#011b3e; display:block; }
-.status-subtitle { font-size:12px; color:#4a5f85; display:block; margin-top:6px; }
-.scoreboard { display:flex; gap:12px; }
-.team-card { flex:1; padding:16px; background:#fff; border:2px solid #011b3e; display:flex; flex-direction:column; align-items:center; }
-.team-label { font-size:12px; color:#4a5f85; }
-.score { font-size:48px; font-weight:600; color:#011b3e; margin:8px 0 12px; }
-.score-btn { width:100%; margin-top:8px; height:44px; border:2px solid #011b3e; }
-.add { background:#ccff00; }
-.undo { background:#fff; }
-.mid-panel { width:120px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:6px; }
-.set-number { font-size:14px; color:#011b3e; font-weight:600; }
-.set-score { font-size:22px; font-weight:700; color:#011b3e; }
-.set-score-label { font-size:10px; color:#4a5f85; }
-.match-point { font-size:12px; color:#ae3200; font-weight:700; }
-.finish-hint { font-size:11px; color:#4a5f85; text-align:center; }
-.log-card { margin-top:16px; padding:16px; border:2px solid #011b3e; background:#fff; }
-.log-title { font-size:16px; font-weight:600; color:#011b3e; display:block; margin-bottom:12px; }
-.log-item { font-size:12px; color:#4a5f85; margin-top:6px; }
+.page {
+  min-height: 100vh;
+  background: #040918;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-size: 40rpx 40rpx;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+}
+
+.bg-blue,
+.bg-red {
+  position: absolute;
+  top: -10%;
+  width: 52vw;
+  height: 120%;
+  filter: blur(80rpx);
+  opacity: 0.22;
+}
+
+.bg-blue {
+  left: -10vw;
+  background: #00d4ff;
+}
+
+.bg-red {
+  right: -10vw;
+  background: #ff3b77;
+}
+
+.main {
+  position: relative;
+  z-index: 2;
+  height: 100vh;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  padding: 8rpx 12rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.team {
+  width: 31%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.crown {
+  margin-bottom: 2rpx;
+  font-size: 40rpx;
+  line-height: 1;
+  animation: crownPulse 1.2s ease-in-out infinite;
+}
+
+.crown-a {
+  text-shadow: 0 0 18rpx rgba(0, 212, 255, 0.85);
+}
+
+.crown-b {
+  text-shadow: 0 0 18rpx rgba(255, 59, 119, 0.85);
+}
+
+.team-name {
+  width: 100%;
+  height: 58rpx;
+  line-height: 58rpx;
+  padding: 0 10rpx;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 800;
+  margin-bottom: 6rpx;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-name-a {
+  color: #80f2ff;
+  text-shadow: 0 0 16rpx rgba(61, 231, 255, 0.7);
+}
+
+.team-name-b {
+  color: #ff94bd;
+  text-shadow: 0 0 16rpx rgba(255, 91, 138, 0.7);
+}
+
+.score-touch-zone {
+  width: 100%;
+  height: 52vh;
+  min-height: 250rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18rpx;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(9, 16, 34, 0.35);
+}
+
+.score {
+  font-size: 150rpx;
+  font-weight: 900;
+  line-height: 0.95;
+}
+
+.score-a {
+  color: #3de7ff;
+  text-shadow:
+    0 0 10rpx rgba(61, 231, 255, 0.8),
+    0 0 28rpx rgba(61, 231, 255, 0.6),
+    0 0 46rpx rgba(61, 231, 255, 0.35);
+  animation: neonBreathBlue 2.2s ease-in-out infinite;
+}
+
+.score-b {
+  color: #ff5b8a;
+  text-shadow:
+    0 0 10rpx rgba(255, 91, 138, 0.8),
+    0 0 28rpx rgba(255, 91, 138, 0.6),
+    0 0 46rpx rgba(255, 91, 138, 0.35);
+  animation: neonBreathRed 2.2s ease-in-out infinite;
+}
+
+.center-panel {
+  width: 34%;
+  min-width: 260rpx;
+  max-width: 360rpx;
+  padding: 16rpx;
+  border-radius: 22rpx;
+  background: rgba(11, 20, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-label {
+  color: #99a5cb;
+  font-size: 22rpx;
+  letter-spacing: 4rpx;
+}
+
+.timer-row {
+  margin: 14rpx 0 18rpx;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+}
+
+.mini {
+  margin: 0;
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  border-radius: 12rpx;
+  background: #1c2847;
+  color: #b4c4ff;
+  font-size: 34rpx;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.timer {
+  font-size: 80rpx;
+  line-height: 1;
+  font-weight: 900;
+  color: #ffd84f;
+  text-shadow:
+    0 0 8rpx rgba(255, 216, 79, 0.9),
+    0 0 24rpx rgba(255, 216, 79, 0.5);
+  animation: timerGlow 1.8s ease-in-out infinite;
+}
+
+.timer-critical {
+  color: #ff5c5c;
+  text-shadow:
+    0 0 10rpx rgba(255, 92, 92, 0.9),
+    0 0 30rpx rgba(255, 92, 92, 0.75),
+    0 0 52rpx rgba(255, 92, 92, 0.5);
+  animation: criticalPulse 0.9s ease-in-out infinite;
+}
+
+.center-ops {
+  width: 100%;
+  display: flex;
+  gap: 10rpx;
+}
+
+.start,
+.reset {
+  margin: 0;
+  border-radius: 14rpx;
+  height: 68rpx;
+  line-height: 68rpx;
+  font-size: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0;
+}
+
+.start {
+  flex: 1;
+}
+
+.play {
+  color: #74f5ad;
+  background: #103a2d;
+  border: 1px solid #1f7d59;
+}
+
+.pause {
+  color: #ffd086;
+  background: #3a2a10;
+  border: 1px solid #8f5f1b;
+}
+
+.reset {
+  width: 156rpx;
+  color: #c7d2fe;
+  background: #1d2848;
+  border: 1px solid #334155;
+}
+
+.time-over {
+  margin-top: 12rpx;
+  color: #ff6b6b;
+  font-size: 28rpx;
+  font-weight: 800;
+  letter-spacing: 2rpx;
+  text-shadow: 0 0 16rpx rgba(255, 92, 92, 0.8);
+}
+
+@keyframes neonBreathBlue {
+  0%,
+  100% {
+    text-shadow:
+      0 0 10rpx rgba(61, 231, 255, 0.8),
+      0 0 28rpx rgba(61, 231, 255, 0.6),
+      0 0 46rpx rgba(61, 231, 255, 0.35);
+  }
+  50% {
+    text-shadow:
+      0 0 14rpx rgba(61, 231, 255, 1),
+      0 0 36rpx rgba(61, 231, 255, 0.9),
+      0 0 66rpx rgba(61, 231, 255, 0.5);
+  }
+}
+
+@keyframes neonBreathRed {
+  0%,
+  100% {
+    text-shadow:
+      0 0 10rpx rgba(255, 91, 138, 0.8),
+      0 0 28rpx rgba(255, 91, 138, 0.6),
+      0 0 46rpx rgba(255, 91, 138, 0.35);
+  }
+  50% {
+    text-shadow:
+      0 0 14rpx rgba(255, 91, 138, 1),
+      0 0 36rpx rgba(255, 91, 138, 0.9),
+      0 0 66rpx rgba(255, 91, 138, 0.5);
+  }
+}
+
+@keyframes timerGlow {
+  0%,
+  100% {
+    text-shadow:
+      0 0 8rpx rgba(255, 216, 79, 0.9),
+      0 0 24rpx rgba(255, 216, 79, 0.5);
+  }
+  50% {
+    text-shadow:
+      0 0 14rpx rgba(255, 216, 79, 1),
+      0 0 34rpx rgba(255, 216, 79, 0.75);
+  }
+}
+
+@keyframes criticalPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.82;
+  }
+}
+
+@keyframes crownPulse {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.95;
+  }
+  50% {
+    transform: translateY(-3rpx);
+    opacity: 1;
+  }
+}
+
+@media (max-height: 430px) {
+  .main {
+    padding: 6rpx 8rpx;
+  }
+
+  .team-name {
+    font-size: 28rpx;
+    margin-bottom: 4rpx;
+  }
+
+  .score-touch-zone {
+    height: 46vh;
+    min-height: 210rpx;
+  }
+
+  .score {
+    font-size: 118rpx;
+  }
+
+  .center-panel {
+    min-width: 224rpx;
+    padding: 10rpx;
+  }
+
+  .timer {
+    font-size: 64rpx;
+  }
+
+  .start,
+  .reset {
+    height: 58rpx;
+    line-height: 58rpx;
+    font-size: 22rpx;
+  }
+
+  .reset {
+    width: 132rpx;
+  }
+}
+
+undefined
+.page.minimal {
+  background: #000;
+}
+
+.page.minimal .bg-grid,
+.page.minimal .bg-blue,
+.page.minimal .bg-red {
+  display: none;
+}
+
+.page.minimal .score-touch-zone,
+.page.minimal .center-panel {
+  background: #0a0a0a;
+  border-color: #444;
+}
+
+.page.minimal .team-name-a,
+.page.minimal .score-a {
+  color: #79d7ff;
+  text-shadow: none;
+  animation: none;
+}
+
+.page.minimal .team-name-b,
+.page.minimal .score-b {
+  color: #ff8fb2;
+  text-shadow: none;
+  animation: none;
+}
+
+.page.minimal .timer {
+  color: #fff;
+  text-shadow: none;
+  animation: none;
+}
+
+.page.minimal .timer-critical {
+  color: #ff4d4d;
+  text-shadow: none;
+  animation: criticalPulse 0.9s ease-in-out infinite;
+}

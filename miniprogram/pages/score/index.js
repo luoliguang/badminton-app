@@ -1,111 +1,141 @@
-const { addScore, endMatch } = require('../../utils/cloudHelper')
-
 Page({
   data: {
-    matchId: '',
+    teamA: 'TEAM BLUE',
+    teamB: 'TEAM RED',
     scoreA: 0,
     scoreB: 0,
-    setNumber: 1,
-    setScoreA: 0,
-    setScoreB: 0,
-    isMatchPoint: false,
-    eventLog: [],
-    watcher: null,
-    scoreEvents: [],
-    matchFinished: false,
-    statusText: '等待开赛',
+    defaultTime: 10 * 60,
+    timeLeft: 10 * 60,
+    formattedTime: '10:00',
+    isRunning: false,
+    timer: null,
+    isALeading: false,
+    isBLeading: false,
+    isTimeCritical: false,
+    touchStartYA: 0,
+    touchStartYB: 0,
+    isMinimalTheme: false,
   },
 
-  onLoad(query) {
-    if (query.matchId) {
-      this.setData({ matchId: query.matchId })
-      this.startWatch(query.matchId)
-    }
+  onLoad() {
+    this.updateDerived();
   },
 
   onUnload() {
-    if (this.data.watcher) this.data.watcher.close()
-    this.setData({ watcher: null })
+    this.clearTimer();
   },
 
-  startWatch(matchId) {
-    const db = wx.cloud.database()
-    const watcher = db.collection('matches').doc(matchId).watch({
-      onChange: (snapshot) => {
-        const match = snapshot.docs && snapshot.docs[0]
-        if (!match) return
-        const currentScore = match.currentScore || { A: 0, B: 0, setNumber: 1 }
-        const setScores = match.setScores || { A: 0, B: 0 }
-        const scoreEvents = match.scoreEvents || []
-        this.setData({
-          scoreA: currentScore.A,
-          scoreB: currentScore.B,
-          setNumber: currentScore.setNumber || 1,
-          setScoreA: setScores.A,
-          setScoreB: setScores.B,
-          isMatchPoint: !!match.isMatchPoint,
-          scoreEvents,
-          statusText: match.status === 'finished' ? '比赛已结束' : '比赛进行中',
-          eventLog: scoreEvents.slice(-5).reverse().map(
-            (item) => `第${item.setNumber || 1}局 ${item.team}队 ${item.delta > 0 ? '+1' : '-1'}`
-          ),
-        })
-        if (match.status === 'finished' && !this.data.matchFinished) {
-          this.setData({ matchFinished: true })
-          wx.redirectTo({ url: `/pages/result/index?matchId=${this.data.matchId}` })
-        }
-      },
-      onError: (err) => {
-        console.error('match watch error:', err)
-      },
-    })
-    this.setData({ watcher })
+  formatTime(seconds) {
+    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    return `${m}:${s}`;
   },
 
-  async addPoint(e) {
-    const team = e.currentTarget.dataset.team
-    try {
-      const res = await addScore({
-        matchId: this.data.matchId,
-        team: team === 'a' ? 'A' : 'B',
-        delta: 1,
-      })
-      if (res.code === 0 && res.data) {
-        this.setData({
-          scoreA: res.data.currentScore ? res.data.currentScore.A : this.data.scoreA,
-          scoreB: res.data.currentScore ? res.data.currentScore.B : this.data.scoreB,
-          setScoreA: res.data.setScores ? res.data.setScores.A : this.data.setScoreA,
-          setScoreB: res.data.setScores ? res.data.setScores.B : this.data.setScoreB,
-          isMatchPoint: !!res.data.isMatchPoint,
-        })
-        if (res.data.shouldEnd && !this.data.matchFinished) {
-          this.setData({ matchFinished: true })
-          await endMatch({ matchId: this.data.matchId })
-          wx.redirectTo({ url: `/pages/result/index?matchId=${this.data.matchId}` })
-        }
+  updateDerived() {
+    const { scoreA, scoreB, timeLeft } = this.data;
+    this.setData({
+      formattedTime: this.formatTime(timeLeft),
+      isALeading: scoreA > scoreB,
+      isBLeading: scoreB > scoreA,
+      isTimeCritical: timeLeft > 0 && timeLeft <= 60,
+    });
+  },
+
+  startTimer() {
+    if (this.data.timer || this.data.timeLeft <= 0) return;
+
+    const timer = setInterval(() => {
+      const next = this.data.timeLeft - 1;
+      if (next <= 0) {
+        this.clearTimer();
+        this.setData({ timeLeft: 0, isRunning: false });
+        this.updateDerived();
+        return;
       }
-    } catch (err) {
-      console.error('add score error:', err)
+      this.setData({ timeLeft: next });
+      this.updateDerived();
+    }, 1000);
+
+    this.setData({ timer, isRunning: true });
+  },
+
+  pauseTimer() {
+    this.clearTimer();
+    this.setData({ isRunning: false });
+  },
+
+  clearTimer() {
+    if (this.data.timer) {
+      clearInterval(this.data.timer);
+      this.setData({ timer: null });
     }
   },
 
-  async onUndoPoint(e) {
-    const team = e.currentTarget.dataset.team
-    try {
-      const res = await addScore({
-        matchId: this.data.matchId,
-        team: team === 'a' ? 'A' : 'B',
-        delta: -1,
-      })
-      if (res.code === 0 && res.data) {
-        this.setData({
-          scoreA: res.data.currentScore ? res.data.currentScore.A : this.data.scoreA,
-          scoreB: res.data.currentScore ? res.data.currentScore.B : this.data.scoreB,
-          isMatchPoint: !!res.data.isMatchPoint,
-        })
-      }
-    } catch (err) {
-      console.error('undo score error:', err)
+  toggleTimer() {
+    if (this.data.isRunning) {
+      this.pauseTimer();
+    } else {
+      this.startTimer();
     }
   },
-})
+
+  resetTimer() {
+    this.clearTimer();
+    this.setData({
+      timeLeft: this.data.defaultTime,
+      isRunning: false,
+    });
+    this.updateDerived();
+  },
+
+  adjustTime(e) {
+    if (this.data.isRunning) return;
+    const deltaMin = Number(e.currentTarget.dataset.delta || 0);
+    const next = Math.max(0, this.data.timeLeft + deltaMin * 60);
+    this.setData({ timeLeft: next, defaultTime: next });
+    this.updateDerived();
+  },
+
+  changeScoreByGesture(team, delta) {
+    if (team === 'A') {
+      this.setData({ scoreA: Math.max(0, this.data.scoreA + delta) });
+    } else {
+      this.setData({ scoreB: Math.max(0, this.data.scoreB + delta) });
+    }
+    this.updateDerived();
+  },
+
+  onScoreTouchStartA(e) {
+    this.setData({ touchStartYA: e.touches[0].clientY });
+  },
+
+  onScoreTouchEndA(e) {
+    const endY = e.changedTouches[0].clientY;
+    const deltaY = endY - this.data.touchStartYA;
+    if (Math.abs(deltaY) < 18) return;
+    this.changeScoreByGesture('A', deltaY < 0 ? 1 : -1);
+  },
+
+  onScoreTouchStartB(e) {
+    this.setData({ touchStartYB: e.touches[0].clientY });
+  },
+
+  onScoreTouchEndB(e) {
+    const endY = e.changedTouches[0].clientY;
+    const deltaY = endY - this.data.touchStartYB;
+    if (Math.abs(deltaY) < 18) return;
+    this.changeScoreByGesture('B', deltaY < 0 ? 1 : -1);
+  },
+
+  onTeamAInput(e) {
+    this.setData({ teamA: e.detail.value.toUpperCase() });
+  },
+
+  onTeamBInput(e) {
+    this.setData({ teamB: e.detail.value.toUpperCase() });
+  },
+
+  toggleTheme() {
+    this.setData({ isMinimalTheme: !this.data.isMinimalTheme });
+  },
+});

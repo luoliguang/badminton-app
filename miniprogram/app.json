@@ -1,51 +1,12 @@
 {
   "pages": [
-    "pages/home/index",
-    "pages/room/index",
-    "pages/score/index",
-    "pages/result/index",
-    "pages/stats/index",
-    "pages/profile/index",
-    "pages/rewards/index"
+    "pages/score/index"
   ],
-  "tabBar": {
-    "custom": false,
-    "color": "#7A879D",
-    "selectedColor": "#011B3E",
-    "backgroundColor": "#FFFFFF",
-    "borderStyle": "white",
-    "list": [
-      {
-        "pagePath": "pages/home/index",
-        "text": "首页",
-        "iconPath": "images/icons/home.png",
-        "selectedIconPath": "images/icons/home-active.png"
-      },
-      {
-        "pagePath": "pages/stats/index",
-        "text": "战绩",
-        "iconPath": "images/icons/business.png",
-        "selectedIconPath": "images/icons/business-active.png"
-      },
-      {
-        "pagePath": "pages/rewards/index",
-        "text": "称号",
-        "iconPath": "images/icons/examples.png",
-        "selectedIconPath": "images/icons/examples-active.png"
-      },
-      {
-        "pagePath": "pages/profile/index",
-        "text": "我的",
-        "iconPath": "images/icons/usercenter.png",
-        "selectedIconPath": "images/icons/usercenter-active.png"
-      }
-    ]
-  },
   "window": {
-    "navigationBarTitleText": "Badminton App",
-    "navigationBarBackgroundColor": "#f7f8fb",
-    "navigationBarTextStyle": "black",
-    "backgroundColor": "#f7f8fb"
+    "navigationBarTitleText": "赛博计分器",
+    "navigationBarBackgroundColor": "#0a1022",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0a1022"
   },
   "style": "v2",
   "lazyCodeLoading": "requiredComponents"
