@@ -501,10 +501,11 @@
 .rank-row {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   padding: 12rpx 10rpx;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12rpx;
+  gap: 10rpx;
 }
 
 .rank-row:nth-child(1) {
@@ -520,39 +521,44 @@
   background: linear-gradient(90deg, rgba(255, 167, 94, 0.12), rgba(255, 167, 94, 0.03));
 }
 
-.rank-index,
+.rank-tag,
 .rank-name,
 .rank-score {
-  font-size: 28rpx;
+  font-size: 24rpx;
 }
 
-.rank-index {
-  width: 150rpx;
+.rank-tag {
+  width: 170rpx;
   color: #9db2e2;
   text-align: left;
   font-weight: 700;
+  line-height: 1.35;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .rank-name {
   flex: 1;
+  min-width: 0;
   color: #ffffff;
   font-weight: 800;
   text-align: center;
-  padding: 0 12rpx;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  padding: 0 8rpx;
+  line-height: 1.35;
+  white-space: normal;
+  word-break: break-word;
   letter-spacing: 1rpx;
 }
 
 .rank-score {
-  width: 140rpx;
+  width: 120rpx;
+  flex-shrink: 0;
   font-weight: 900;
   text-align: right;
   animation: scoreFlicker 1.8s ease-in-out infinite;
 }
 
-.rank-row:nth-child(1) .rank-index,
+.rank-row:nth-child(1) .rank-tag,
 .rank-row:nth-child(1) .rank-name,
 .rank-row:nth-child(1) .rank-score {
   color: #ffe07a;
@@ -561,18 +567,30 @@
     0 0 22rpx rgba(255, 224, 122, 0.55);
 }
 
-.rank-row:nth-child(2) .rank-index,
+.rank-row:nth-child(2) .rank-tag,
 .rank-row:nth-child(2) .rank-name,
 .rank-row:nth-child(2) .rank-score {
   color: #d6e5ff;
   text-shadow: 0 0 8rpx rgba(214, 229, 255, 0.6);
 }
 
-.rank-row:nth-child(3) .rank-index,
+.rank-row:nth-child(3) .rank-tag,
 .rank-row:nth-child(3) .rank-name,
 .rank-row:nth-child(3) .rank-score {
   color: #ffc694;
   text-shadow: 0 0 8rpx rgba(255, 198, 148, 0.55);
+}
+
+.result-message {
+  margin-top: 14rpx;
+  padding: 14rpx 16rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  line-height: 1.5;
+  color: #d7e3ff;
+  background: rgba(17, 40, 62, 0.7);
+  border: 1px solid rgba(126, 231, 255, 0.35);
+  text-align: center;
 }
 
 .restart {
@@ -710,10 +728,10 @@
     padding: 10rpx 8rpx;
   }
 
-  .rank-index,
+  .rank-tag,
   .rank-name,
   .rank-score {
-    font-size: 26rpx;
+    font-size: 22rpx;
   }
 
   .restart {

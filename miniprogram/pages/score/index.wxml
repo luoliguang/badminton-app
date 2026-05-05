@@ -94,7 +94,7 @@
       <text class="result-title">比赛结果</text>
       <view class="result-list">
         <view wx:for="{{rankings}}" wx:key="id" class="rank-row">
-          <text class="rank-index">第{{index + 1}}名</text>
+          <text class="rank-tag">{{item.tag}}</text>
           <text class="rank-name">{{item.name}}</text>
           <text class="rank-score">{{item.totalScore}} 分</text>
         </view>

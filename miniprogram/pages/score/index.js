@@ -25,6 +25,7 @@ Page({
     roundScoreRight: 0,
     roundIndex: 1,
     rankings: [],
+    resultMessage: '',
 
     trioRuleTiePolicy: 'block', // block | leftLose | rightLose
     trioRuleEndMatchPolicy: 'block', // block | autoSettle
@@ -336,6 +337,78 @@ Page({
     return true;
   },
 
+  buildResultMessage(rankings = []) {
+    if (!rankings.length) return '';
+
+    const winner = rankings[0];
+    const winnerName = (winner.name || '').toUpperCase();
+    const isLuoWinner = winnerName.includes('罗') || winnerName.includes('LUO');
+
+    const luoWinMessages = [
+      '罗同学今日稳定发挥，你们还得练练。',
+      '罗同学认证：你们确实还得练。',
+      '本局由罗同学教学演示，对手建议加练。',
+    ];
+    const luoLoseMessages = [
+      '这把算你们运气好，罗同学下把认真了。',
+      '行吧，这局算你们运气好。',
+      '你们先别庆祝，罗同学热身刚结束。',
+    ];
+
+    const pool = isLuoWinner ? luoWinMessages : luoLoseMessages;
+    const index = Math.floor(Math.random() * pool.length);
+    return pool[index];
+  },
+
+  isLuoName(name = '') {
+    const upper = String(name || '').toUpperCase();
+    return upper.includes('罗') || upper.includes('LUO');
+  },
+
+  decorateRankingsWithTag(rankings = []) {
+    if (!rankings.length) return [];
+
+    const normalWinnerTag = '发挥稳定';
+    const normalOtherTag = '继续加油';
+    const mockOthersTags = ['还得练', '建议加练', '继续努力'];
+    const luoHardTalkTags = ['先让你小子一手', '算你小子运气好', '这把给你小子了'];
+    const funnyCheerTags = ['明天继续加油', '差一点就起飞', '状态在路上'];
+
+    const winner = rankings[0];
+    const isLuoWinner = this.isLuoName(winner && winner.name);
+    const isTrioMode = this.data.matchMode === 'trio';
+
+    return rankings.map((item, index) => {
+      // 默认：冠军正常，其它普通加油
+      let tag = index === 0 ? normalWinnerTag : normalOtherTag;
+
+      if (!isTrioMode) {
+        return { ...item, tag };
+      }
+
+      // 情况1：冠军是罗 -> 冠军正常，其他两人幽默嘲讽
+      if (isLuoWinner) {
+        if (index !== 0) {
+          tag = mockOthersTags[Math.floor(Math.random() * mockOthersTags.length)];
+        }
+        return { ...item, tag };
+      }
+
+      // 情况2：冠军不是罗 -> 冠军正常；罗嘴硬；另外一个人幽默加油
+      if (index === 0) {
+        return { ...item, tag: normalWinnerTag };
+      }
+
+      if (this.isLuoName(item.name)) {
+        tag = luoHardTalkTags[Math.floor(Math.random() * luoHardTalkTags.length)];
+      } else {
+        tag = funnyCheerTags[Math.floor(Math.random() * funnyCheerTags.length)];
+      }
+
+      return { ...item, tag };
+    });
+  },
+
   endMatch() {
     if (this.data.phase !== 'playing') return;
 
@@ -346,7 +419,9 @@ Page({
         { id: 'a', name: this.data.teamA || 'TEAM A', totalScore: this.data.scoreA },
         { id: 'b', name: this.data.teamB || 'TEAM B', totalScore: this.data.scoreB },
       ].sort((x, y) => y.totalScore - x.totalScore);
-      this.setData({ phase: 'finished', rankings });
+      const decoratedRankings = this.decorateRankingsWithTag(rankings);
+      const resultMessage = this.buildResultMessage(rankings);
+      this.setData({ phase: 'finished', rankings: decoratedRankings, resultMessage });
       return;
     }
 
@@ -365,7 +440,9 @@ Page({
 
     this.pauseTimer();
     const rankings = [...this.data.players].sort((a, b) => b.totalScore - a.totalScore);
-    this.setData({ phase: 'finished', rankings });
+    const decoratedRankings = this.decorateRankingsWithTag(rankings);
+    const resultMessage = this.buildResultMessage(rankings);
+    this.setData({ phase: 'finished', rankings: decoratedRankings, resultMessage });
   },
 
   restartMatch() {
@@ -375,6 +452,8 @@ Page({
         phase: 'playing',
         scoreA: 0,
         scoreB: 0,
+        rankings: [],
+        resultMessage: '',
         timeLeft: this.data.defaultTime,
         isRunning: false,
         actionHistory: [],
@@ -393,6 +472,7 @@ Page({
       roundScoreRight: 0,
       roundIndex: 1,
       rankings: [],
+      resultMessage: '',
       timeLeft: this.data.defaultTime,
       isRunning: false,
       lastAction: null,
@@ -422,6 +502,7 @@ Page({
       roundScoreRight: 0,
       roundIndex: 1,
       rankings: [],
+      resultMessage: '',
       timeLeft: this.data.defaultTime,
       isRunning: false,
       lastAction: null,
