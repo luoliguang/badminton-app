@@ -44,6 +44,8 @@ Page({
     touchStartYRight: 0,
     isMinimalTheme: false,
     actionHistory: [],
+    showSettings: false,
+    scoreboard: [],
   },
 
   onLoad() {
@@ -127,6 +129,12 @@ Page({
     return this.data.players.find((p) => p.id === id);
   },
 
+  toggleSettings() {
+    this.setData({ showSettings: !this.data.showSettings });
+  },
+
+  stopProp() {},
+
   updateDerived() {
     const {
       scoreA,
@@ -137,13 +145,15 @@ Page({
       onCourtLeftId,
       onCourtRightId,
       waitingId,
+      players,
+      matchMode,
     } = this.data;
 
     const leftPlayer = this.getPlayerById(onCourtLeftId);
     const rightPlayer = this.getPlayerById(onCourtRightId);
     const waitingPlayer = this.getPlayerById(waitingId);
 
-    this.setData({
+    const updates = {
       formattedTime: this.formatTime(timeLeft),
       isALeading: scoreA > scoreB,
       isBLeading: scoreB > scoreA,
@@ -153,7 +163,18 @@ Page({
       leftPlayerName: leftPlayer ? leftPlayer.name : '',
       rightPlayerName: rightPlayer ? rightPlayer.name : '',
       waitingPlayerName: waitingPlayer ? waitingPlayer.name : '',
-    });
+    };
+
+    if (matchMode === 'trio') {
+      updates.scoreboard = players.map((p) => ({
+        id: p.id,
+        name: p.name,
+        totalScore: p.totalScore,
+        status: p.id === onCourtLeftId ? 'left' : p.id === onCourtRightId ? 'right' : 'waiting',
+      }));
+    }
+
+    this.setData(updates);
   },
 
   startTimer() {
