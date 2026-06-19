@@ -30,9 +30,9 @@ Page({
     trioRuleTiePolicy: 'block', // block | leftLose | rightLose
     trioRuleEndMatchPolicy: 'block', // block | autoSettle
 
-    defaultTime: 10 * 60,
-    timeLeft: 10 * 60,
-    formattedTime: '10:00',
+    defaultTime: 5 * 60,
+    timeLeft: 5 * 60,
+    formattedTime: '05:00',
     isRunning: false,
     timer: null,
     isLeftLeading: false,
@@ -46,6 +46,7 @@ Page({
     actionHistory: [],
     showSettings: false,
     scoreboard: [],
+    endTimePickerVal: '',
   },
 
   onLoad() {
@@ -174,6 +175,9 @@ Page({
       }));
     }
 
+    const endDate = new Date(Date.now() + timeLeft * 1000);
+    updates.endTimePickerVal = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+
     this.setData(updates);
   },
 
@@ -220,7 +224,26 @@ Page({
     if (this.data.isRunning || this.data.phase !== 'playing') return;
     const deltaMin = Number(e.currentTarget.dataset.delta || 0);
     const next = Math.max(0, this.data.timeLeft + deltaMin * 60);
-    this.setData({ timeLeft: next, defaultTime: next });
+    this.setData({ timeLeft: next });
+    this.updateDerived();
+  },
+
+  onEndTimePick(e) {
+    if (this.data.isRunning || this.data.phase !== 'playing') return;
+    const [hh, mm] = e.detail.value.split(':').map(Number);
+    const now = new Date();
+    const end = new Date(now);
+    end.setHours(hh, mm, 0, 0);
+    const diffSeconds = Math.round((end.getTime() - now.getTime()) / 1000);
+    if (diffSeconds <= 0) {
+      wx.showToast({ title: '所选时刻已过', icon: 'none', duration: 1500 });
+      return;
+    }
+    if (diffSeconds > 7200) {
+      wx.showToast({ title: '最多设置 2 小时', icon: 'none', duration: 1500 });
+      return;
+    }
+    this.setData({ timeLeft: diffSeconds });
     this.updateDerived();
   },
 

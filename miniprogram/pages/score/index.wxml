@@ -45,10 +45,14 @@
         <text class="timer-label">MATCH TIME</text>
 
         <view class="timer-row">
-          <button wx:if="{{!isRunning}}" class="mini" data-delta="-1" bindtap="adjustTime">-</button>
-          <text class="timer {{isTimeCritical ? 'timer-critical' : ''}}">{{formattedTime}}</text>
-          <button wx:if="{{!isRunning}}" class="mini" data-delta="1" bindtap="adjustTime">+</button>
+          <button wx:if="{{!isRunning}}" class="mini" data-delta="-5" bindtap="adjustTime">-</button>
+          <picker wx:if="{{!isRunning}}" mode="time" value="{{endTimePickerVal}}" bindchange="onEndTimePick">
+            <text class="timer {{isTimeCritical ? 'timer-critical' : ''}} timer-pickable">{{formattedTime}}</text>
+          </picker>
+          <text wx:else class="timer {{isTimeCritical ? 'timer-critical' : ''}}">{{formattedTime}}</text>
+          <button wx:if="{{!isRunning}}" class="mini" data-delta="5" bindtap="adjustTime">+</button>
         </view>
+        <text wx:if="{{!isRunning}}" class="timer-pick-hint">点击时间选结束时刻</text>
 
         <text wx:if="{{timeLeft === 0}}" class="time-over">TIME OVER</text>
 

@@ -946,6 +946,19 @@
 .tp-pbadge-right { color: rgba(255, 91, 138, 0.7); }
 .tp-pbadge-waiting { color: rgba(255, 255, 255, 0.28); }
 
+.timer-pickable {
+  border-bottom: 2rpx solid rgba(255, 216, 79, 0.4);
+  padding-bottom: 4rpx;
+}
+
+.timer-pick-hint {
+  font-size: 18rpx;
+  color: rgba(255, 255, 255, 0.28);
+  letter-spacing: 1px;
+  text-align: center;
+  margin-bottom: 4rpx;
+}
+
 /* ─── 滑动提示 ─── */
 .swipe-hint {
   font-size: 18rpx;
